@@ -108,7 +108,7 @@ The `SetTimePacket` example above is the equivalent of:
 ```php
 /**
  * @param DataPacketSendEvent $event
- * @priority MONITOR
+ * @priority NORMAL
  */
 public function onDataPacketSend(DataPacketSendEvent $event) : void{
 	foreach($event->getPackets() as $packet){
