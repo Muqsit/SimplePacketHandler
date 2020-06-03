@@ -27,6 +27,38 @@ $packet_monitor->monitorOutgoing(function(SetActorDataPacket $packet, NetworkSes
 });
 ```
 
+The `LoginPacket` example above is the equivalent of:
+```php
+/**
+ * @param DataPacketReceiveEvent $event
+ * @priority MONITOR
+ */
+public function onDataPacketReceive(DataPacketReceiveEvent $event) : void{
+	$packet = $event->getPacket();
+	if($packet instanceof LoginPacket){
+		$origin = $event->getOrigin();
+		$this->getLogger()->debug("Received LoginPacket from #" . spl_object_id($origin));
+	}
+}
+```
+
+The `SetActorDataPacket` example above is the equivalent of:
+```php
+/**
+ * @param DataPacketSendEvent $event
+ * @priority MONITOR
+ */
+public function onDataPacketSend(DataPacketSendEvent $event) : void{
+	foreach($event->getPackets() as $packet){
+		if($packet instanceof SetActorDataPacket){
+			foreach($event->getTargets() as $target){
+				$this->getLogger()->debug("Sent SetActorDataPacket to #" . spl_object_id($target));
+			}
+		}
+	}
+}
+```
+
 ### Packet Interceptor
 Handle data packets - DataPacket(Receive/Send)Event(s) are registered at < `MONITOR` priority.
 
@@ -53,4 +85,57 @@ $packet_interceptor->interceptOutgoing(function(SetTimePacket $packet, NetworkSe
 	}
 	return true;
 });
+```
+
+The `AdventureSettingsPacket` example above is the equivalent of:
+```php
+/**
+ * @param DataPacketReceiveEvent $event
+ * @priority NORMAL
+ */
+public function onDataPacketReceive(DataPacketReceiveEvent $event) : void{
+	$packet = $event->getPacket();
+	if($packet instanceof AdventureSettingsPacket){
+		$origin = $event->getOrigin();
+		if($packet->getFlag(AdventureSettingsPacket::FLYING)){
+			$event->setCancelled();
+		}
+	}
+}
+```
+
+The `SetTimePacket` example above is the equivalent of:
+```php
+/**
+ * @param DataPacketSendEvent $event
+ * @priority MONITOR
+ */
+public function onDataPacketSend(DataPacketSendEvent $event) : void{
+	foreach($event->getPackets() as $packet){
+		if($packet instanceof SetTimePacket){
+			$targets = $event->getTargets();
+			foreach($targets as $index => $target){
+				$custom_player = CustomPlayerManager::get($target->getPlayer());
+				if($custom_player->getPTime() !== $packet->time){
+					$target->sendDataPacket(SetTimePacket::create($custom_player->getPTime()));
+					
+					// Cancel the event, try sending the remaining targets the
+					// batch of packets again.
+					
+					$event->setCancelled();
+					$new_targets = $targets;
+					unset($new_targets[$index]);
+					if(count($new_targets) > 0){
+						$new_target_players = [];
+						foreach($new_targets as $new_target){
+							$new_target_players[] = $new_target->getPlayer();
+						}
+						$this->getServer()->broadcastPackets($new_target_players, $event->getPackets());
+					}
+					break;
+				}
+			}
+		}
+	}
+}
 ```
