@@ -38,14 +38,14 @@ Use case:
 /** @var Plugin $plugin */
 $packet_interceptor = SimplePacketHandler::createInterceptor($plugin);
 
-$packet_monitor->interceptIncoming(function(AdventureSettingsPacket $packet, NetworkSession $origin) : bool{
+$packet_interceptor->interceptIncoming(function(AdventureSettingsPacket $packet, NetworkSession $origin) : bool{
 	if($packet->getFlag(AdventureSettingsPacket::FLYING)){
 		return false; // cancels the DataPacketReceiveEvent
 	}
 	return true; // do nothing
 });
 
-$packet_monitor->interceptOutgoing(function(SetTimePacket $packet, NetworkSession $target) : bool{
+$packet_interceptor->interceptOutgoing(function(SetTimePacket $packet, NetworkSession $target) : bool{
 	$custom_player = CustomPlayerManager::get($target->getPlayer());
 	if($custom_player->getPTime() !== $packet->time){
 		$target->sendDataPacket(SetTimePacket::create($custom_player->getPTime()));
