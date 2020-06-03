@@ -132,7 +132,7 @@ public function onDataPacketSend(DataPacketSendEvent $event) : void{
 						}
 						$this->getServer()->broadcastPackets($new_target_players, $event->getPackets());
 					}
-					break;
+					break 2;
 				}
 			}
 		}
