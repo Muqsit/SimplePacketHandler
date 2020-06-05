@@ -86,14 +86,14 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 				$packets = $event->getPackets();
 
 				/** @var DataPacket|ClientboundPacket $packet */
-				foreach($packets as $i => $packet){
+				foreach($packets as $packet){
 					if(isset($this->outgoing_handlers[$pid = $packet::NETWORK_ID])){
 						$remaining_targets = $original_targets;
 
-						foreach($remaining_targets as $j => $target){
+						foreach($remaining_targets as $i => $target){
 							foreach($this->outgoing_handlers[$pid] as $handler){
 								if(!$handler($packet, $target)){
-									unset($remaining_targets[$j]);
+									unset($remaining_targets[$i]);
 									break;
 								}
 							}
