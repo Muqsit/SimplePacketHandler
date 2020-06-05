@@ -78,7 +78,7 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 				/** @var DataPacket|ClientboundPacket $packet */
 				foreach($event->getPackets() as $packet){
 					if(isset($this->outgoing_handlers[$pid = $packet::NETWORK_ID])){
-						foreach($event->getTargets() as $index => $target){
+						foreach($event->getTargets() as $target){
 							foreach($this->outgoing_handlers[$pid] as $handler){
 								$handler($packet, $target);
 							}
