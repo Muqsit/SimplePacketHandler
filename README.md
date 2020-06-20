@@ -114,26 +114,27 @@ public function onDataPacketSend(DataPacketSendEvent $event) : void{
 	foreach($event->getPackets() as $packet){
 		if($packet instanceof SetTimePacket){
 			$targets = $event->getTargets();
-			foreach($targets as $index => $target){
+			$new_targets = $targets;
+			foreach($new_targets as $index => $target){
 				$custom_player = CustomPlayerManager::get($target->getPlayer());
 				if($custom_player->getPTime() !== $packet->time){
 					$target->sendDataPacket(SetTimePacket::create($custom_player->getPTime()));
-					
-					// Cancel the event, try sending the remaining targets the
-					// batch of packets again.
-					
-					$event->setCancelled();
-					$new_targets = $targets;
 					unset($new_targets[$index]);
-					if(count($new_targets) > 0){
-						$new_target_players = [];
-						foreach($new_targets as $new_target){
-							$new_target_players[] = $new_target->getPlayer();
-						}
-						$this->getServer()->broadcastPackets($new_target_players, $event->getPackets());
-					}
-					break 2;
 				}
+			}
+
+			if(count($new_targets) !== count($targets)){
+				// Cancel the event, try sending the remaining targets the
+				// batch of packets again.
+				$event->setCancelled();
+				if(count($new_targets > 0){
+					$new_target_players = [];
+					foreach($new_targets as $new_target){
+						$new_target_players[] = $new_target->getPlayer();
+					}
+					$this->getServer()->broadcastPackets($new_target_players, $event->getPackets());
+				}
+				break;
 			}
 		}
 	}
