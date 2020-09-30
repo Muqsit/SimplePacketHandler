@@ -98,7 +98,7 @@ public function onDataPacketReceive(DataPacketReceiveEvent $event) : void{
 	if($packet instanceof AdventureSettingsPacket){
 		$origin = $event->getOrigin();
 		if($packet->getFlag(AdventureSettingsPacket::FLYING)){
-			$event->setCancelled();
+			$event->cancel();
 		}
 	}
 }
@@ -126,7 +126,7 @@ public function onDataPacketSend(DataPacketSendEvent $event) : void{
 			if(count($new_targets) !== count($targets)){
 				// Cancel the event, try sending the remaining targets the
 				// batch of packets again.
-				$event->setCancelled();
+				$event->cancel();
 				if(count($new_targets > 0){
 					$new_target_players = [];
 					foreach($new_targets as $new_target){

@@ -64,7 +64,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 					$origin = $event->getOrigin();
 					foreach($this->incoming_handlers[$pid] as $handler){
 						if(!$handler($packet, $origin)){
-							$event->setCancelled();
+							$event->cancel();
 							break;
 						}
 					}
@@ -101,7 +101,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 
 						$remaining_targets_c = count($remaining_targets);
 						if($remaining_targets_c !== count($original_targets)){
-							$event->setCancelled();
+							$event->cancel();
 							if($remaining_targets_c > 0){
 								$new_target_players = [];
 								foreach($remaining_targets as $new_target){
