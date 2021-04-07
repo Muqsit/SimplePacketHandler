@@ -9,8 +9,7 @@ use pocketmine\plugin\Plugin;
 
 final class PacketInterceptor implements IPacketInterceptor{
 
-	/** @var PacketInterceptorListener */
-	private $listener;
+	private PacketInterceptorListener $listener;
 
 	public function __construct(Plugin $register, int $priority, bool $handleCancelled){
 		$this->listener = new PacketInterceptorListener($register, $priority, $handleCancelled);

@@ -9,8 +9,7 @@ use pocketmine\plugin\Plugin;
 
 final class PacketMonitor implements IPacketMonitor{
 
-	/** @var PacketMonitorListener */
-	private $listener;
+	private PacketMonitorListener $listener;
 
 	public function __construct(Plugin $register, bool $handleCancelled){
 		$this->listener = new PacketMonitorListener($register, $handleCancelled);

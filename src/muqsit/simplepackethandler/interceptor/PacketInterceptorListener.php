@@ -18,32 +18,23 @@ use pocketmine\Server;
 
 final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 
-	/** @var Plugin */
-	private $register;
-
-	/** @var int */
-	private $priority;
-
-	/** @var bool */
-	private $handleCancelled;
-
-	/** @var Closure|null */
-	private $incoming_event_handler;
-
-	/** @var Closure|null */
-	private $outgoing_event_handler;
+	private Plugin $register;
+	private int $priority;
+	private bool $handleCancelled;
+	private ?Closure $incoming_event_handler = null;
+	private ?Closure $outgoing_event_handler = null;
 
 	/**
 	 * @var Closure[][]
 	 * @phpstan-var array<int, array<Closure(ServerboundPacket, NetworkSession) : bool>>
 	 */
-	private $incoming_handlers = [];
+	private array $incoming_handlers = [];
 
 	/**
 	 * @var Closure[][]
 	 * @phpstan-var array<int, array<Closure(ClientboundPacket, NetworkSession) : bool>>
 	 */
-	private $outgoing_handlers = [];
+	private array $outgoing_handlers = [];
 
 	public function __construct(Plugin $register, int $priority, bool $handleCancelled){
 		$this->register = $register;
@@ -57,7 +48,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 		$this->incoming_handlers[$classes[0]::NETWORK_ID][spl_object_id($handler)] = $handler;
 
 		if($this->incoming_event_handler === null){
-			$this->register->getServer()->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, $this->incoming_event_handler = function(DataPacketReceiveEvent $event) : void{
+			Server::getInstance()->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, $this->incoming_event_handler = function(DataPacketReceiveEvent $event) : void{
 				/** @var DataPacket|ServerboundPacket $packet */
 				$packet = $event->getPacket();
 				if(isset($this->incoming_handlers[$pid = $packet::NETWORK_ID])){
@@ -81,7 +72,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 		$this->outgoing_handlers[$classes[0]::NETWORK_ID][spl_object_id($handler)] = $handler;
 
 		if($this->outgoing_event_handler === null){
-			$this->register->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, $this->outgoing_event_handler = function(DataPacketSendEvent $event) : void{
+			Server::getInstance()->getPluginManager()->registerEvent(DataPacketSendEvent::class, $this->outgoing_event_handler = function(DataPacketSendEvent $event) : void{
 				$original_targets = $event->getTargets();
 				$packets = $event->getPackets();
 
@@ -110,6 +101,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 										$new_target_players[] = $new_target_player;
 									}
 								}
+
 								Server::getInstance()->broadcastPackets($new_target_players, $packets);
 							}
 							break;
