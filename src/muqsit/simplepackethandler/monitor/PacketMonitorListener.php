@@ -46,7 +46,7 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 
 		if($this->incoming_event_handler === null){
 			Server::getInstance()->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, $this->incoming_event_handler = function(DataPacketReceiveEvent $event) : void{
-				/** @var DataPacket|ServerboundPacket $packet */
+				/** @var DataPacket&ServerboundPacket $packet */
 				$packet = $event->getPacket();
 				if(isset($this->incoming_handlers[$pid = $packet::NETWORK_ID])){
 					$origin = $event->getOrigin();
@@ -67,7 +67,7 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 
 		if($this->outgoing_event_handler === null){
 			Server::getInstance()->getPluginManager()->registerEvent(DataPacketSendEvent::class, $this->outgoing_event_handler = function(DataPacketSendEvent $event) : void{
-				/** @var DataPacket|ClientboundPacket $packet */
+				/** @var DataPacket&ClientboundPacket $packet */
 				foreach($event->getPackets() as $packet){
 					if(isset($this->outgoing_handlers[$pid = $packet::NETWORK_ID])){
 						foreach($event->getTargets() as $target){

@@ -46,7 +46,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 
 		if($this->incoming_event_handler === null){
 			Server::getInstance()->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, $this->incoming_event_handler = function(DataPacketReceiveEvent $event) : void{
-				/** @var DataPacket|ServerboundPacket $packet */
+				/** @var DataPacket&ServerboundPacket $packet */
 				$packet = $event->getPacket();
 				if(isset($this->incoming_handlers[$pid = $packet::NETWORK_ID])){
 					$origin = $event->getOrigin();
@@ -73,7 +73,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 				$original_targets = $event->getTargets();
 				$packets = $event->getPackets();
 
-				/** @var DataPacket|ClientboundPacket $packet */
+				/** @var DataPacket&ClientboundPacket $packet */
 				foreach($packets as $packet){
 					if(isset($this->outgoing_handlers[$pid = $packet::NETWORK_ID])){
 						$remaining_targets = $original_targets;
