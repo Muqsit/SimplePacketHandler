@@ -24,4 +24,14 @@ final class PacketMonitor implements IPacketMonitor{
 		$this->listener->monitorOutgoing($handler);
 		return $this;
 	}
+
+	public function unregisterIncomingMonitor(Closure $handler) : IPacketMonitor{
+		$this->listener->unregisterIncomingMonitor($handler);
+		return $this;
+	}
+
+	public function unregisterOutgoingMonitor(Closure $handler) : IPacketMonitor{
+		$this->listener->unregisterOutgoingMonitor($handler);
+		return $this;
+	}
 }
