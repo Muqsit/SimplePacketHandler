@@ -18,9 +18,6 @@ use pocketmine\Server;
 
 final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 
-	private Plugin $register;
-	private int $priority;
-	private bool $handleCancelled;
 	private ?Closure $incoming_event_handler = null;
 	private ?Closure $outgoing_event_handler = null;
 
@@ -36,11 +33,11 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 	 */
 	private array $outgoing_handlers = [];
 
-	public function __construct(Plugin $register, int $priority, bool $handleCancelled){
-		$this->register = $register;
-		$this->priority = $priority;
-		$this->handleCancelled = $handleCancelled;
-	}
+	public function __construct(
+		private Plugin $register,
+		private int $priority,
+		private bool $handleCancelled
+	){}
 
 	public function interceptIncoming(Closure $handler) : IPacketInterceptor{
 		$classes = ClosureSignatureParser::parse($handler, [ServerboundPacket::class, NetworkSession::class], "bool");

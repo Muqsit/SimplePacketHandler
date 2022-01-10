@@ -19,8 +19,6 @@ use pocketmine\Server;
 
 final class PacketMonitorListener implements IPacketMonitor, Listener{
 
-	private Plugin $register;
-	private bool $handleCancelled;
 	private ?Closure $incoming_event_handler = null;
 	private ?Closure $outgoing_event_handler = null;
 
@@ -36,10 +34,10 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 	 */
 	private array $outgoing_handlers = [];
 
-	public function __construct(Plugin $register, bool $handleCancelled){
-		$this->register = $register;
-		$this->handleCancelled = $handleCancelled;
-	}
+	public function __construct(
+		private Plugin $register,
+		private bool $handleCancelled
+	){}
 
 	public function monitorIncoming(Closure $handler) : IPacketMonitor{
 		$classes = ClosureSignatureParser::parse($handler, [ServerboundPacket::class, NetworkSession::class], "void");
