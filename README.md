@@ -127,7 +127,7 @@ public function onDataPacketSend(DataPacketSendEvent $event) : void{
 				// Cancel the event, try sending the remaining targets the
 				// batch of packets again.
 				$event->cancel();
-				if(count($new_targets > 0){
+				if(count($new_targets) > 0){
 					$new_target_players = [];
 					foreach($new_targets as $new_target){
 						$new_target_players[] = $new_target->getPlayer();
