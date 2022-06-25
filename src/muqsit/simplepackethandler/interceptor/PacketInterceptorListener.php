@@ -132,7 +132,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 	}
 
 	public function unregisterOutgoingInterceptor(Closure $handler) : IPacketInterceptor{
-		if(isset($this->outgoing_handlers[$pid = self::getPidFromHandler($handler, ServerboundPacket::class)][$hid = spl_object_id($handler)])){
+		if(isset($this->outgoing_handlers[$pid = self::getPidFromHandler($handler, ClientboundPacket::class)][$hid = spl_object_id($handler)])){
 			unset($this->outgoing_handlers[$pid][$hid]);
 			if(count($this->outgoing_handlers[$pid]) === 0){
 				unset($this->outgoing_handlers[$pid]);
