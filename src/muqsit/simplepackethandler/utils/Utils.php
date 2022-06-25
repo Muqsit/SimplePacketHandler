@@ -49,14 +49,11 @@ final class Utils{
 	}
 
 	/**
-	 * @param string $event
-	 * @param Closure $handler
+	 * @template TEvent of \pocketmine\event\Event
+	 * @param class-string<TEvent> $event
+	 * @param Closure(TEvent) : void $handler
 	 * @param int $priority
 	 * @return bool
-	 *
-	 * @phpstan-template TEvent of \pocketmine\event\Event
-	 * @phpstan-param class-string<TEvent> $event
-	 * @phpstan-param Closure(TEvent) : void $handler
 	 */
 	public static function unregisterEventByHandler(string $event, Closure $handler, int $priority) : bool{
 		$list = HandlerListManager::global()->getListFor($event);

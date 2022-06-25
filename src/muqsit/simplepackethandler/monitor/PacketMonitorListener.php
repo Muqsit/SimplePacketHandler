@@ -20,13 +20,11 @@ use pocketmine\Server;
 final class PacketMonitorListener implements IPacketMonitor, Listener{
 
 	/**
-	 * @param Closure $handler
+	 * @template TPacket of \pocketmine\network\mcpe\protocol\Packet
+	 * @template UPacket of TPacket
+	 * @param Closure(UPacket, NetworkSession) : void $handler
+	 * @param class-string<TPacket> $class
 	 * @return int
-	 *
-	 * @phpstan-template TPacket of \pocketmine\network\mcpe\protocol\Packet
-	 * @phpstan-template UPacket of TPacket
-	 * @phpstan-param Closure(UPacket, NetworkSession) : void $handler
-	 * @phpstan-param class-string<TPacket> $class
 	 */
 	private static function getPidFromHandler(Closure $handler, string $class) : int{
 		$classes = Utils::parseClosureSignature($handler, [$class, NetworkSession::class], "void");
@@ -34,19 +32,16 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 		return $classes[0]::NETWORK_ID;
 	}
 
+	/** @var (Closure(DataPacketReceiveEvent) : void)|null */
 	private ?Closure $incoming_event_handler = null;
+
+	/** @var (Closure(DataPacketSendEvent) : void)|null */
 	private ?Closure $outgoing_event_handler = null;
 
-	/**
-	 * @var Closure[][]
-	 * @phpstan-var array<int, array<Closure(ServerboundPacket, NetworkSession) : void>>
-	 */
+	/** @var array<int, array<Closure(ServerboundPacket, NetworkSession) : void>> */
 	private array $incoming_handlers = [];
 
-	/**
-	 * @var Closure[][]
-	 * @phpstan-var array<int, array<Closure(ClientboundPacket, NetworkSession) : void>>
-	 */
+	/** @var array<int, array<Closure(ClientboundPacket, NetworkSession) : void>> */
 	private array $outgoing_handlers = [];
 
 	public function __construct(

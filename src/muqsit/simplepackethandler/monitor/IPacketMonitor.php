@@ -12,38 +12,30 @@ use pocketmine\network\mcpe\protocol\ServerboundPacket;
 interface IPacketMonitor{
 
 	/**
-	 * @param Closure $handler
+	 * @template TServerboundPacket of ServerboundPacket
+	 * @param Closure(TServerboundPacket, NetworkSession) : void $handler
 	 * @return IPacketMonitor
-	 *
-	 * @phpstan-template TServerboundPacket of ServerboundPacket
-	 * @phpstan-param Closure(TServerboundPacket, NetworkSession) : void $handler
 	 */
 	public function monitorIncoming(Closure $handler) : IPacketMonitor;
 
 	/**
-	 * @param Closure $handler
+	 * @template TClientboundPacket of ClientboundPacket
+	 * @param Closure(TClientboundPacket, NetworkSession) : void $handler
 	 * @return IPacketMonitor
-	 *
-	 * @phpstan-template TClientboundPacket of ClientboundPacket
-	 * @phpstan-param Closure(TClientboundPacket, NetworkSession) : void $handler
 	 */
 	public function monitorOutgoing(Closure $handler) : IPacketMonitor;
 
 	/**
-	 * @param Closure $handler
+	 * @template TServerboundPacket of ServerboundPacket
+	 * @param Closure(TServerboundPacket, NetworkSession) : void $handler
 	 * @return IPacketMonitor
-	 *
-	 * @phpstan-template TServerboundPacket of ServerboundPacket
-	 * @phpstan-param Closure(TServerboundPacket, NetworkSession) : void $handler
 	 */
 	public function unregisterIncomingMonitor(Closure $handler) : IPacketMonitor;
 
 	/**
-	 * @param Closure $handler
+	 * @template TClientboundPacket of ClientboundPacket
+	 * @param Closure(TClientboundPacket, NetworkSession) : void $handler
 	 * @return IPacketMonitor
-	 *
-	 * @phpstan-template TClientboundPacket of ClientboundPacket
-	 * @phpstan-param Closure(TClientboundPacket, NetworkSession) : void $handler
 	 */
 	public function unregisterOutgoingMonitor(Closure $handler) : IPacketMonitor;
 }
