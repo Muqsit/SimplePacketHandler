@@ -7,7 +7,6 @@ namespace muqsit\simplepackethandler\interceptor;
 use Closure;
 use muqsit\simplepackethandler\utils\Utils;
 use pocketmine\event\HandlerListManager;
-use pocketmine\event\Listener;
 use pocketmine\event\RegisteredListener;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
@@ -18,7 +17,7 @@ use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 
-final class PacketInterceptorListener implements IPacketInterceptor, Listener{
+final class PacketInterceptorListener implements IPacketInterceptor{
 
 	/**
 	 * @template TPacket of \pocketmine\network\mcpe\protocol\Packet
