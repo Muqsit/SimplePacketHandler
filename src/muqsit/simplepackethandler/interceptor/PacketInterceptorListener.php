@@ -6,7 +6,9 @@ namespace muqsit\simplepackethandler\interceptor;
 
 use Closure;
 use muqsit\simplepackethandler\utils\Utils;
+use pocketmine\event\HandlerListManager;
 use pocketmine\event\Listener;
+use pocketmine\event\RegisteredListener;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\NetworkSession;
@@ -31,11 +33,8 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 		return $classes[0]::NETWORK_ID;
 	}
 
-	/** @var (Closure(DataPacketReceiveEvent) : void)|null */
-	private ?Closure $incoming_event_handler = null;
-
-	/** @var (Closure(DataPacketSendEvent) : void)|null */
-	private ?Closure $outgoing_event_handler = null;
+	private ?RegisteredListener $incoming_event_handler = null;
+	private ?RegisteredListener $outgoing_event_handler = null;
 
 	/** @var array<int, array<Closure(ServerboundPacket, NetworkSession) : bool>> */
 	private array $incoming_handlers = [];
@@ -51,69 +50,61 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 
 	public function interceptIncoming(Closure $handler) : IPacketInterceptor{
 		$this->incoming_handlers[self::getPidFromHandler($handler, ServerboundPacket::class)][spl_object_id($handler)] = $handler;
-
-		if($this->incoming_event_handler === null){
-			Server::getInstance()->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, $this->incoming_event_handler = function(DataPacketReceiveEvent $event) : void{
-				/** @var DataPacket&ServerboundPacket $packet */
-				$packet = $event->getPacket();
-				if(isset($this->incoming_handlers[$pid = $packet::NETWORK_ID])){
-					$origin = $event->getOrigin();
-					foreach($this->incoming_handlers[$pid] as $handler){
-						if(!$handler($packet, $origin)){
-							$event->cancel();
-							break;
-						}
+		$this->incoming_event_handler ??= Server::getInstance()->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, function(DataPacketReceiveEvent $event) : void{
+			/** @var DataPacket&ServerboundPacket $packet */
+			$packet = $event->getPacket();
+			if(isset($this->incoming_handlers[$pid = $packet::NETWORK_ID])){
+				$origin = $event->getOrigin();
+				foreach($this->incoming_handlers[$pid] as $handler){
+					if(!$handler($packet, $origin)){
+						$event->cancel();
+						break;
 					}
 				}
-			}, $this->priority, $this->register, $this->handleCancelled);
-		}
-
+			}
+		}, $this->priority, $this->register, $this->handleCancelled);
 		return $this;
 	}
 
 	public function interceptOutgoing(Closure $handler) : IPacketInterceptor{
 		$this->outgoing_handlers[self::getPidFromHandler($handler, ClientboundPacket::class)][spl_object_id($handler)] = $handler;
+		$this->outgoing_event_handler ??= Server::getInstance()->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{
+			$original_targets = $event->getTargets();
+			$packets = $event->getPackets();
 
-		if($this->outgoing_event_handler === null){
-			Server::getInstance()->getPluginManager()->registerEvent(DataPacketSendEvent::class, $this->outgoing_event_handler = function(DataPacketSendEvent $event) : void{
-				$original_targets = $event->getTargets();
-				$packets = $event->getPackets();
+			/** @var DataPacket&ClientboundPacket $packet */
+			foreach($packets as $packet){
+				if(isset($this->outgoing_handlers[$pid = $packet::NETWORK_ID])){
+					$remaining_targets = $original_targets;
 
-				/** @var DataPacket&ClientboundPacket $packet */
-				foreach($packets as $packet){
-					if(isset($this->outgoing_handlers[$pid = $packet::NETWORK_ID])){
-						$remaining_targets = $original_targets;
-
-						foreach($remaining_targets as $i => $target){
-							foreach($this->outgoing_handlers[$pid] as $handler){
-								if(!$handler($packet, $target)){
-									unset($remaining_targets[$i]);
-									break;
-								}
+					foreach($remaining_targets as $i => $target){
+						foreach($this->outgoing_handlers[$pid] as $handler){
+							if(!$handler($packet, $target)){
+								unset($remaining_targets[$i]);
+								break;
 							}
-						}
-
-						$remaining_targets_c = count($remaining_targets);
-						if($remaining_targets_c !== count($original_targets)){
-							$event->cancel();
-							if($remaining_targets_c > 0){
-								$new_target_players = [];
-								foreach($remaining_targets as $new_target){
-									$new_target_player = $new_target->getPlayer();
-									if($new_target_player !== null){
-										$new_target_players[] = $new_target_player;
-									}
-								}
-
-								Server::getInstance()->broadcastPackets($new_target_players, $packets);
-							}
-							break;
 						}
 					}
-				}
-			}, $this->priority, $this->register, $this->handleCancelled);
-		}
 
+					$remaining_targets_c = count($remaining_targets);
+					if($remaining_targets_c !== count($original_targets)){
+						$event->cancel();
+						if($remaining_targets_c > 0){
+							$new_target_players = [];
+							foreach($remaining_targets as $new_target){
+								$new_target_player = $new_target->getPlayer();
+								if($new_target_player !== null){
+									$new_target_players[] = $new_target_player;
+								}
+							}
+
+							Server::getInstance()->broadcastPackets($new_target_players, $packets);
+						}
+						break;
+					}
+				}
+			}
+		}, $this->priority, $this->register, $this->handleCancelled);
 		return $this;
 	}
 
@@ -123,7 +114,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 			if(count($this->incoming_handlers[$pid]) === 0){
 				unset($this->incoming_handlers[$pid]);
 				if(count($this->incoming_handlers) === 0){
-					Utils::unregisterEventByHandler(DataPacketReceiveEvent::class, $this->incoming_event_handler, $this->priority);
+					HandlerListManager::global()->getListFor(DataPacketReceiveEvent::class)->unregister($this->incoming_event_handler);
 					$this->incoming_event_handler = null;
 				}
 			}
@@ -137,7 +128,7 @@ final class PacketInterceptorListener implements IPacketInterceptor, Listener{
 			if(count($this->outgoing_handlers[$pid]) === 0){
 				unset($this->outgoing_handlers[$pid]);
 				if(count($this->outgoing_handlers) === 0){
-					Utils::unregisterEventByHandler(DataPacketSendEvent::class, $this->outgoing_event_handler, $this->priority);
+					HandlerListManager::global()->getListFor(DataPacketSendEvent::class)->unregister($this->outgoing_event_handler);
 					$this->outgoing_event_handler = null;
 				}
 			}

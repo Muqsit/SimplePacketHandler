@@ -7,7 +7,9 @@ namespace muqsit\simplepackethandler\monitor;
 use Closure;
 use muqsit\simplepackethandler\utils\Utils;
 use pocketmine\event\EventPriority;
+use pocketmine\event\HandlerListManager;
 use pocketmine\event\Listener;
+use pocketmine\event\RegisteredListener;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\NetworkSession;
@@ -32,11 +34,8 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 		return $classes[0]::NETWORK_ID;
 	}
 
-	/** @var (Closure(DataPacketReceiveEvent) : void)|null */
-	private ?Closure $incoming_event_handler = null;
-
-	/** @var (Closure(DataPacketSendEvent) : void)|null */
-	private ?Closure $outgoing_event_handler = null;
+	private ?RegisteredListener $incoming_event_handler = null;
+	private ?RegisteredListener $outgoing_event_handler = null;
 
 	/** @var array<int, array<Closure(ServerboundPacket, NetworkSession) : void>> */
 	private array $incoming_handlers = [];
@@ -51,41 +50,33 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 
 	public function monitorIncoming(Closure $handler) : IPacketMonitor{
 		$this->incoming_handlers[self::getPidFromHandler($handler, ServerboundPacket::class)][spl_object_id($handler)] = $handler;
-
-		if($this->incoming_event_handler === null){
-			Server::getInstance()->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, $this->incoming_event_handler = function(DataPacketReceiveEvent $event) : void{
-				/** @var DataPacket&ServerboundPacket $packet */
-				$packet = $event->getPacket();
-				if(isset($this->incoming_handlers[$pid = $packet::NETWORK_ID])){
-					$origin = $event->getOrigin();
-					foreach($this->incoming_handlers[$pid] as $handler){
-						$handler($packet, $origin);
-					}
+		$this->incoming_event_handler ??= Server::getInstance()->getPluginManager()->registerEvent(DataPacketReceiveEvent::class, function(DataPacketReceiveEvent $event) : void{
+			/** @var DataPacket&ServerboundPacket $packet */
+			$packet = $event->getPacket();
+			if(isset($this->incoming_handlers[$pid = $packet::NETWORK_ID])){
+				$origin = $event->getOrigin();
+				foreach($this->incoming_handlers[$pid] as $handler){
+					$handler($packet, $origin);
 				}
-			}, EventPriority::MONITOR, $this->register, $this->handleCancelled);
-		}
-
+			}
+		}, EventPriority::MONITOR, $this->register, $this->handleCancelled);
 		return $this;
 	}
 
 	public function monitorOutgoing(Closure $handler) : IPacketMonitor{
 		$this->outgoing_handlers[self::getPidFromHandler($handler, ClientboundPacket::class)][spl_object_id($handler)] = $handler;
-
-		if($this->outgoing_event_handler === null){
-			Server::getInstance()->getPluginManager()->registerEvent(DataPacketSendEvent::class, $this->outgoing_event_handler = function(DataPacketSendEvent $event) : void{
-				/** @var DataPacket&ClientboundPacket $packet */
-				foreach($event->getPackets() as $packet){
-					if(isset($this->outgoing_handlers[$pid = $packet::NETWORK_ID])){
-						foreach($event->getTargets() as $target){
-							foreach($this->outgoing_handlers[$pid] as $handler){
-								$handler($packet, $target);
-							}
+		$this->outgoing_event_handler ??= Server::getInstance()->getPluginManager()->registerEvent(DataPacketSendEvent::class, function(DataPacketSendEvent $event) : void{
+			/** @var DataPacket&ClientboundPacket $packet */
+			foreach($event->getPackets() as $packet){
+				if(isset($this->outgoing_handlers[$pid = $packet::NETWORK_ID])){
+					foreach($event->getTargets() as $target){
+						foreach($this->outgoing_handlers[$pid] as $handler){
+							$handler($packet, $target);
 						}
 					}
 				}
-			}, EventPriority::MONITOR, $this->register, $this->handleCancelled);
-		}
-
+			}
+		}, EventPriority::MONITOR, $this->register, $this->handleCancelled);
 		return $this;
 	}
 
@@ -95,12 +86,11 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 			if(count($this->incoming_handlers[$pid]) === 0){
 				unset($this->incoming_handlers[$pid]);
 				if(count($this->incoming_handlers) === 0){
-					Utils::unregisterEventByHandler(DataPacketReceiveEvent::class, $this->incoming_event_handler, EventPriority::MONITOR);
+					HandlerListManager::global()->getListFor(DataPacketReceiveEvent::class)->unregister($this->incoming_event_handler);
 					$this->incoming_event_handler = null;
 				}
 			}
 		}
-
 		return $this;
 	}
 
@@ -110,12 +100,11 @@ final class PacketMonitorListener implements IPacketMonitor, Listener{
 			if(count($this->outgoing_handlers[$pid]) === 0){
 				unset($this->outgoing_handlers[$pid]);
 				if(count($this->outgoing_handlers) === 0){
-					Utils::unregisterEventByHandler(DataPacketSendEvent::class, $this->outgoing_event_handler, EventPriority::MONITOR);
+					HandlerListManager::global()->getListFor(DataPacketSendEvent::class)->unregister($this->outgoing_event_handler);
 					$this->outgoing_event_handler = null;
 				}
 			}
 		}
-
 		return $this;
 	}
 }

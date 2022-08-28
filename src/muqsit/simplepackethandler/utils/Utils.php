@@ -6,7 +6,6 @@ namespace muqsit\simplepackethandler\utils;
 
 use Closure;
 use InvalidArgumentException;
-use pocketmine\event\HandlerListManager;
 use ReflectionFunction;
 use ReflectionNamedType;
 
@@ -46,23 +45,5 @@ final class Utils{
 		}
 
 		throw new InvalidArgumentException("Closure must satisfy signature (" . implode(", ", $params) . ") : {$return_type}");
-	}
-
-	/**
-	 * @template TEvent of \pocketmine\event\Event
-	 * @param class-string<TEvent> $event
-	 * @param Closure(TEvent) : void $handler
-	 * @param int $priority
-	 * @return bool
-	 */
-	public static function unregisterEventByHandler(string $event, Closure $handler, int $priority) : bool{
-		$list = HandlerListManager::global()->getListFor($event);
-		foreach($list->getListenersByPriority($priority) as $listener){
-			if($listener->getHandler() === $handler){
-				$list->unregister($listener);
-				return true;
-			}
-		}
-		return false;
 	}
 }
