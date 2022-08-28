@@ -44,7 +44,7 @@ final class PacketMonitorListener implements IPacketMonitor{
 
 	public function __construct(
 		private Plugin $register,
-		private bool $handleCancelled
+		private bool $handle_cancelled
 	){}
 
 	public function monitorIncoming(Closure $handler) : IPacketMonitor{
@@ -58,7 +58,7 @@ final class PacketMonitorListener implements IPacketMonitor{
 					$handler($packet, $origin);
 				}
 			}
-		}, EventPriority::MONITOR, $this->register, $this->handleCancelled);
+		}, EventPriority::MONITOR, $this->register, $this->handle_cancelled);
 		return $this;
 	}
 
@@ -75,7 +75,7 @@ final class PacketMonitorListener implements IPacketMonitor{
 					}
 				}
 			}
-		}, EventPriority::MONITOR, $this->register, $this->handleCancelled);
+		}, EventPriority::MONITOR, $this->register, $this->handle_cancelled);
 		return $this;
 	}
 

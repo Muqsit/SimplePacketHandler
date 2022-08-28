@@ -11,8 +11,8 @@ final class PacketInterceptor implements IPacketInterceptor{
 
 	private PacketInterceptorListener $listener;
 
-	public function __construct(Plugin $register, int $priority, bool $handleCancelled){
-		$this->listener = new PacketInterceptorListener($register, $priority, $handleCancelled);
+	public function __construct(Plugin $register, int $priority, bool $handle_cancelled){
+		$this->listener = new PacketInterceptorListener($register, $priority, $handle_cancelled);
 	}
 
 	public function interceptIncoming(Closure $handler) : IPacketInterceptor{

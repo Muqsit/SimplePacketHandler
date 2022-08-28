@@ -44,7 +44,7 @@ final class PacketInterceptorListener implements IPacketInterceptor{
 	public function __construct(
 		private Plugin $register,
 		private int $priority,
-		private bool $handleCancelled
+		private bool $handle_cancelled
 	){}
 
 	public function interceptIncoming(Closure $handler) : IPacketInterceptor{
@@ -61,7 +61,7 @@ final class PacketInterceptorListener implements IPacketInterceptor{
 					}
 				}
 			}
-		}, $this->priority, $this->register, $this->handleCancelled);
+		}, $this->priority, $this->register, $this->handle_cancelled);
 		return $this;
 	}
 
@@ -103,7 +103,7 @@ final class PacketInterceptorListener implements IPacketInterceptor{
 					}
 				}
 			}
-		}, $this->priority, $this->register, $this->handleCancelled);
+		}, $this->priority, $this->register, $this->handle_cancelled);
 		return $this;
 	}
 
