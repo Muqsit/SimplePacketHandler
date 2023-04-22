@@ -1,0 +1,23 @@
+{
+    "name": "muqsit/simple-packet-handler",
+    "description": "Handle specific data packets (virion for PMMP API 4.0.0)",
+    "type": "library",
+    "require": {
+        "pocketmine/pocketmine-mp": "^4.0.0"
+    },
+    "autoload": {
+        "classmap": ["src"]
+    },
+    "authors": [
+        {
+            "name": "Muqsit",
+            "email": "hackhack05@gmail.com"
+        }
+    ],
+    "extra": {
+        "virion": {
+            "spec": "3.0",
+            "namespace-root": "muqsit\\simplepackethandler"
+        }
+    }
+}
