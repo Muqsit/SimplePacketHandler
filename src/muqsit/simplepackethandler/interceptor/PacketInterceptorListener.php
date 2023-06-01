@@ -43,9 +43,9 @@ final class PacketInterceptorListener implements IPacketInterceptor{
 	private array $outgoing_handlers = [];
 
 	public function __construct(
-		private Plugin $register,
-		private int $priority,
-		private bool $handle_cancelled
+		readonly private Plugin $register,
+		readonly private int $priority,
+		readonly private bool $handle_cancelled
 	){}
 
 	public function interceptIncoming(Closure $handler) : IPacketInterceptor{
