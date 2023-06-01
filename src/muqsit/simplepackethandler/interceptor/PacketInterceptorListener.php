@@ -10,6 +10,7 @@ use pocketmine\event\HandlerListManager;
 use pocketmine\event\RegisteredListener;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
+use pocketmine\network\mcpe\NetworkBroadcastUtils;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -98,7 +99,7 @@ final class PacketInterceptorListener implements IPacketInterceptor{
 								}
 							}
 
-							Server::getInstance()->broadcastPackets($new_target_players, $packets);
+							NetworkBroadcastUtils::broadcastPackets($new_target_players, $packets);
 						}
 						break;
 					}
