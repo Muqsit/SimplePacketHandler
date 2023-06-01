@@ -2,6 +2,7 @@
     "name": "muqsit/simple-packet-handler",
     "description": "Handle specific data packets (virion for PMMP API 4.0.0)",
     "type": "library",
+    "license": "GPL-3.0",
     "require": {
         "pocketmine/pocketmine-mp": "^4.0.0"
     },
