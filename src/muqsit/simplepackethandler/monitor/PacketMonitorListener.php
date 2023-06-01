@@ -14,6 +14,7 @@ use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
@@ -21,7 +22,7 @@ use pocketmine\Server;
 final class PacketMonitorListener implements IPacketMonitor{
 
 	/**
-	 * @template TPacket of \pocketmine\network\mcpe\protocol\Packet
+	 * @template TPacket of Packet
 	 * @template UPacket of TPacket
 	 * @param Closure(UPacket, NetworkSession) : void $handler
 	 * @param class-string<TPacket> $class
