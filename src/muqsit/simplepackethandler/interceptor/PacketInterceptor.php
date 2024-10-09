@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace muqsit\simplepackethandler\interceptor;
 
 use Closure;
+use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\plugin\Plugin;
 
 final class PacketInterceptor implements IPacketInterceptor{
 
 	readonly private PacketInterceptorListener $listener;
 
-	public function __construct(Plugin $register, int $priority, bool $handle_cancelled){
-		$this->listener = new PacketInterceptorListener($register, $priority, $handle_cancelled);
+	public function __construct(Plugin $register, PacketPool $pool, int $priority, bool $handle_cancelled){
+		$this->listener = new PacketInterceptorListener($register, $pool, $priority, $handle_cancelled);
 	}
 
 	public function interceptIncoming(Closure $handler) : IPacketInterceptor{

@@ -10,6 +10,7 @@ use muqsit\simplepackethandler\interceptor\PacketInterceptor;
 use muqsit\simplepackethandler\monitor\IPacketMonitor;
 use muqsit\simplepackethandler\monitor\PacketMonitor;
 use pocketmine\event\EventPriority;
+use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\plugin\Plugin;
 
 final class SimplePacketHandler{
@@ -18,10 +19,10 @@ final class SimplePacketHandler{
 		if($priority === EventPriority::MONITOR){
 			throw new InvalidArgumentException("Cannot intercept packets at MONITOR priority");
 		}
-		return new PacketInterceptor($registerer, $priority, $handle_cancelled);
+		return new PacketInterceptor($registerer, PacketPool::getInstance(), $priority, $handle_cancelled);
 	}
 
 	public static function createMonitor(Plugin $registerer, bool $handle_cancelled = false) : IPacketMonitor{
-		return new PacketMonitor($registerer, $handle_cancelled);
+		return new PacketMonitor($registerer, PacketPool::getInstance(), $handle_cancelled);
 	}
 }
