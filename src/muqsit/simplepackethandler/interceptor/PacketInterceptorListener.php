@@ -19,9 +19,7 @@ use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
-use function assert;
 use function count;
-use function is_a;
 use function spl_object_id;
 
 final class PacketInterceptorListener implements IPacketInterceptor{
