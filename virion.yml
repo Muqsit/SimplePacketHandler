@@ -1,5 +1,5 @@
 name: PacketHandler
 antigen: muqsit\simplepackethandler
-api: 5.0.0
-version: 0.1.5
+api: 5.41.0
+version: 0.1.6
 author: Muqsit
